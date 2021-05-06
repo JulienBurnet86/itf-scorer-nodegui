@@ -39,5 +39,9 @@ module.exports = {
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".jsx"]
   },
-  plugins: [new CleanWebpackPlugin()]
+  plugins: [new CleanWebpackPlugin()],
+  externals: {
+	bufferutil: "bufferutil",
+	"utf-8-validate": "utf-8-validate",
+  }
 };
