@@ -43,13 +43,25 @@ const playerSet2 = new QLabel();
 const playerSet3 = new QLabel();
 const playerPoints = new QLabel();
 
+const scores = ["0", "15", "30", "40", "AD"]
+
+function getFormattedPoint(p: any) {
+	var point
+	if (!p.tiebreak) {
+		point = scores[p.points]
+	} else {
+		point = p.points;
+	}
+	return point
+}
+
 function updatePlayer1(player1Obj: any) {
 	player.setText(player1Obj.name);
 	player.setObjectName("player")
 	playerSet1.setText(player1Obj.games[0]);
 	playerSet2.setText(player1Obj.games[1]);
 	playerSet3.setText(player1Obj.games[2]);
-	playerPoints.setText(player1Obj.points);
+	playerPoints.setText(getFormattedPoint(player1Obj));
 }
 updatePlayer1(match.players[0]);
 
@@ -66,7 +78,7 @@ function updatePlayer2(player2Obj: any) {
 	player2Set1.setText(player2Obj.games[0]);
 	player2Set2.setText(player2Obj.games[1]);
 	player2Set3.setText(player2Obj.games[2]);
-	player2Points.setText(player2Obj.points);
+	player2Points.setText(getFormattedPoint(player2Obj));
 }
 updatePlayer2(match.players[1]);
 
