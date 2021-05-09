@@ -1,7 +1,7 @@
 import { QGridLayout, QLabel, QMainWindow, QWidget } from '@nodegui/nodegui';
 const WebSocket = require('ws')
 
-const ws = new WebSocket('ws://localhost:8080');
+const ws = new WebSocket('ws://82.165.96.150:8800');
 
 ws.on('message', (msg: any) => {
 	Object.assign(match, JSON.parse(msg));
@@ -25,7 +25,9 @@ const match = {
 }
 
 ws.on('connect', (msg: any) => {
-	
+	Object.assign(match, JSON.parse(msg));
+	updatePlayer1(match.players[0]);
+	updatePlayer2(match.players[1]);
 })
 
 const win = new QMainWindow();
@@ -92,7 +94,6 @@ rootLayout.addWidget(player2Set1, 2, 2);
 rootLayout.addWidget(player2Set2, 2, 3);
 rootLayout.addWidget(player2Set3, 2, 4);
 rootLayout.addWidget(player2Points, 2, 5);
-
 
 win.setCentralWidget(view);
 win.setStyleSheet(
