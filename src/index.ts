@@ -1,9 +1,13 @@
 import { QGridLayout, QLabel, QMainWindow, QWidget } from '@nodegui/nodegui';
 const WebSocket = require('ws')
 
-var config = require("./config.json")
+var fs = require('fs')
+var data = fs.readFileSync("./config.json")
+
+var config = JSON.parse(data);
 if (!config) 
 	throw new Error("Please create a config.json file")
+console.log("config : ", JSON.stringify(config));
 const courtName = config.courtName
 const wsAddress = config.wsAddress
 
