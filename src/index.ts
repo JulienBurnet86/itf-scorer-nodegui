@@ -1,35 +1,36 @@
 import { QGridLayout, QLabel, QMainWindow, QWidget } from '@nodegui/nodegui';
 const WebSocket = require('ws')
 
-const ws = new WebSocket('ws://82.165.96.150:8800');
+var config = require("./config.json")
+if (!config) 
+	throw new Error("Please create a config.json file")
+const courtName = config.courtName
+const wsAddress = config.wsAddress
 
-ws.on('message', (msg: any) => {
-	Object.assign(match, JSON.parse(msg));
-	console.log(match);
-	updatePlayer1(match.players[0]);
-	updatePlayer2(match.players[1]);
-});
-
-const match = {
-	players: [
-		{
-			name: "",
-			games: [0, 0, 0],
-			points: 0
+// const ws = new WebSocket('ws://82.165.96.150:8800');
+function connect() {
+	console.log("Trying to connect ....")
+	const ws = new WebSocket(wsAddress);
+	
+	ws.on('error', (e: Error) => {
+		console.log("An error has ocurred", e)
+		setTimeout(() => connect(), 10000)
+	})
+	ws.on('message', (msg: any) => {
+		console.log(`Receiving ${msg}`)
+		const matches = JSON.parse(msg);
+		console.log(`Matches ${JSON.stringify(matches)}`)
+		if (matches[courtName]) {
+			updatePlayer1(matches[courtName].player1);
+			updatePlayer2(matches[courtName].player2);
 		}
-		, {
-			name: "",
-			games: [0, 0, 0],
-			points: 0
-		}]
+	})
+	ws.on('close', (e: any) => {
+		console.log("Got disconnected")
+		setTimeout(() => connect(), 10000)
+	})
 }
-
-ws.on('connect', (msg: any) => {
-	Object.assign(match, JSON.parse(msg));
-	updatePlayer1(match.players[0]);
-	updatePlayer2(match.players[1]);
-})
-
+connect()
 const win = new QMainWindow();
 win.removeStatusBar();
 // win.setWindowTitle("Hello World");
@@ -44,6 +45,10 @@ const playerSet1 = new QLabel();
 const playerSet2 = new QLabel();
 const playerSet3 = new QLabel();
 const playerPoints = new QLabel();
+const playerServe = new QLabel();
+
+playerPoints.setInlineStyle("background-color: blue")
+
 
 const scores = ["0", "15", "30", "40", "AD"]
 
@@ -63,15 +68,18 @@ function updatePlayer1(player1Obj: any) {
 	playerSet1.setText(player1Obj.games[0]);
 	playerSet2.setText(player1Obj.games[1]);
 	playerSet3.setText(player1Obj.games[2]);
-	playerPoints.setText(getFormattedPoint(player1Obj));
+	playerPoints.setText(player1Obj.point);
+	playerServe.setText(player1Obj.server ? "🎾" : "");
 }
-updatePlayer1(match.players[0]);
+//updatePlayer1(match.players[0]);
 
 const player2 = new QLabel();
 const player2Set1 = new QLabel();
 const player2Set2 = new QLabel();
 const player2Set3 = new QLabel();
 const player2Points = new QLabel();
+const player2Serve = new QLabel();
+player2Points.setInlineStyle("background-color: blue")
 
 player2.setObjectName("player")
 
@@ -80,26 +88,29 @@ function updatePlayer2(player2Obj: any) {
 	player2Set1.setText(player2Obj.games[0]);
 	player2Set2.setText(player2Obj.games[1]);
 	player2Set3.setText(player2Obj.games[2]);
-	player2Points.setText(getFormattedPoint(player2Obj));
+	player2Points.setText(player2Obj.point);
+	player2Serve.setText(player2Obj.server ? "🎾" : "");
 }
-updatePlayer2(match.players[1]);
+//updatePlayer2(match.players[1]);
 
 rootLayout.addWidget(player, 1, 1);
 rootLayout.addWidget(playerSet1, 1, 2);
 rootLayout.addWidget(playerSet2, 1, 3);
 rootLayout.addWidget(playerSet3, 1, 4);
 rootLayout.addWidget(playerPoints, 1, 5);
+rootLayout.addWidget(playerServe, 1, 6);
 rootLayout.addWidget(player2, 2, 1);
 rootLayout.addWidget(player2Set1, 2, 2);
 rootLayout.addWidget(player2Set2, 2, 3);
 rootLayout.addWidget(player2Set3, 2, 4);
 rootLayout.addWidget(player2Points, 2, 5);
+rootLayout.addWidget(player2Serve, 2, 6);
 
 win.setCentralWidget(view);
 win.setStyleSheet(
   `
     #main {
-      background-color: green;
+      background-color: black;
       height: '100%';
       justify-content: 'center';
 	  border: 1px solid;
@@ -109,6 +120,7 @@ win.setStyleSheet(
 		font-weight: bold;
 		padding: 1;
 		color: white;
+		border: 1px solid black;
     }
   `
 );
